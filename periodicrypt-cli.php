@@ -26,7 +26,7 @@ function load_periodicrypt() {
  * Prints a usage message and exits.
  */
 function usage() {
-  print 'Usage: ' . $_SERVER['argv'][0] . 'encode|decode "encode this" message' . "\n";
+  print 'Usage: ' . $_SERVER['argv'][0] . ' encode|decode "encode this" message' . "\n";
   exit(1);
 }
 
