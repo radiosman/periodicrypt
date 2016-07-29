@@ -1,0 +1,18 @@
+{
+  "name": "travis-bradbury/periodicrypt-cli",
+  "description": "A command line tool for the Periodicrypt custom hashing and un-hashing library.",
+  "authors": [
+    {
+      "name": "Travis Bradbury",
+      "email": "travis@0x29a.ca"
+    }
+  ],
+  "require": {
+    "nategood/commando": "0.2.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Periodicrypt_cli\\": "src/"
+    }
+  }
+}

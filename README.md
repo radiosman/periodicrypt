@@ -1,6 +1,8 @@
 # Periodicrypt CLI
 
-periodicrypt-cli is a PHP command line wrapper for the encryption library found here: http://codereview.stackexchange.com/questions/114881/custom-algorithm-for-hashing-and-un-hashing-password
+periodicrypt-cli is a PHP command line wrapper for the custom hashing and
+un-hashing library found here: 
+[Custom algorithm for hashing and un-hashing password](http://codereview.stackexchange.com/questions/114881/custom-algorithm-for-hashing-and-un-hashing-password)
 
 ## Installation
 

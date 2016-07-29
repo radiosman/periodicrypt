@@ -5,86 +5,60 @@
  * Command line wrapper for the periodicrypt library.
  */
 
-/**
- * Loads the libperiodicrypt library.
- * Looks for environment variable LIBPERIODICRYPTDIR or in the current directory.
- * Exits with error if no file found.
- */
-function load_periodicrypt() {
-  $dir = isset($_ENV['LIBPERIODICRYPTDIR']) ? $_ENV['LIBPERIODICRYPTDIR'] : '.';
-  $file = $dir . '/libperiodicrypt.php';
-  if (file_exists($file)) {
-    require($file);
-  }
-  else {
-    print "libperiodicrypt not found. For more information see https://github.com/radiosman/periodicrypt.\n";
-    exit(1);
-  }
-}
+namespace Periodicrypt_cli;
+use \Commando\Command;
 
-/**
- * Prints a usage message and exits.
- */
-function usage() {
-  print 'Usage: ' . $_SERVER['argv'][0] . ' encode|decode "encode this" message' . "\n";
-  exit(1);
-}
-
-/**
- * Ensure that a minimum number of arguments are given.
- * If verification fails, call usage().
- */
-function verify_args() {
-  $num_args = count($_SERVER['argv']);
-  $valid_commands = array('encode', 'decode');
-  if ($num_args < 2 || !in_array($_SERVER['argv'][1], $valid_commands)) {
-    usage();
-  }
-}
-
-/**
- * Build message to (en|de)code.
- */
-function getMessage() {
-  $args = array_slice($_SERVER['argv'], 2);
-
-  if (!empty($args)) {
-    return join(' ', $args);
-  }
-  else {
-    $stdin = fopen('php://stdin', 'r');
-    return fread($stdin, 8192);
-  }
-}
+require_once('vendor/autoload.php');
 
 /**
  * Main program execution.
  */
 function main() {
-  load_periodicrypt();
-  verify_args();
-  $message = getMessage();
-  $coding_function = false;
-  $coded_message = false;
+  $cmd = new Command();
+  $cmd->option()
+    ->referToAs('method')
+    ->require()
+    ->describedAs("The operation to perform: 'encode' or 'decode'.")
+    ->must(function($opt) {
+      return in_array($opt, ["encode", "decode"]);
+    });
+  $cmd->option('n')
+    ->aka('newlines')
+    ->describedAs("Do not perform newline finangling.")
+    ->boolean()
+    ->default(TRUE);
 
-  switch ($_SERVER['argv'][1]) {
-    case 'encode':
-      $coding_function = 'HashIt';
-      break;
-    case 'decode':
-      $coding_function = 'UnhashIt';
-      break;
-    default:
-      usage();
+  $arguments = $cmd->getArguments();
+  $method = $arguments[0]->getValue();
+
+  // Remove method from arguments.
+  $arguments = array_slice($arguments, 1);
+  if (empty($arguments)) {
+    $stdin = fopen('php://stdin', 'r');
+    // TODO this seems to be broken; the script hangs when it is piped to.
+    $input = fread($stdin, 8192);
+  }
+  else {
+    $input = array_reduce($arguments, function ($a, $v) {
+      return $a . ' ' . $v->getValue();
+    }, '');
   }
 
-  $coded_message = $coding_function($message);
+  $kajigger_newlines = $cmd->getOption('n')->getValue();
+  if ($kajigger_newlines) {
+    $input = rtrim($input, "\n");
+  }
 
-  print $coded_message;
+  $periodicrypt = new Periodicrypt($method, $input);
 
+  $output = $periodicrypt->execute();
+
+  if ($kajigger_newlines) {
+    $output .= "\n";
+  }
+
+  print $output;
   exit(0);
-
 }
 
 main();
-?>

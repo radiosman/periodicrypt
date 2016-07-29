@@ -1,1 +1,4 @@
 libperiodicrypt.php
+vendor
+.idea
+composer.lock
